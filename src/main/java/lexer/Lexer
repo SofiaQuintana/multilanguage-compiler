@@ -1,0 +1,65 @@
+package lexer;
+import java_cup.runtime.*;
+import parser.sym;
+import abstract_syntax_tree.environment.GlobalError;
+import java.util.LinkedList;
+
+%%// Area Break
+
+%public
+%class MultilanguageLexer
+%cup
+%cupdebug
+%line
+%column
+%states VB_CODE, PYTHON_CODE, JAVA_CODE, C_CODE
+
+/* RegEx */
+Identifier = [:jletter:] [:jletterdigit:]*
+Integer = 0 | [1-9][0-9]*
+Decimal = ({Integer})(".")({Integer})
+LineTerminator = \r | \n | \r\n
+Whitespace = {LineTerminator} | [ \t\f]
+InputCharacter = [^\r\n]
+TraditionalComment = "/*" [^*] ~"*/" | "/*" "*" + "/"
+BasicComment = "//" {InputCharacter}* {LineTerminator}? 
+
+%{
+    LinkedList<GlobalError> errors;
+
+    public MultilanguageLexer(java.io.Reader in, LinkedList<GlobalError> errors) {
+        this.zzReader = in;
+        this.errors = errors;
+    }
+
+    private Symbol symbol(int type) {
+        return new Symbol(type, yyline+1, yycolumn+1);
+    }
+
+    private Symbol symbol(int type, Object value) {
+        return new Symbol(type, yyline+1, yycolumn+1, value);
+    }
+
+    private void printToken(String token){
+        System.out.println(token);
+    }
+
+    private void lexical_error(String value, int line, int column, String block) {
+        GlobalError error = new GlobalError(line, column, "lexico", value, "elemento invalido en el bloque " + block);
+        errors.add(error);
+    }
+
+%}
+
+%%// Area Break
+
+
+/*-----------------------------AREA DE ESTADO INICIAL ----------------------------------*/
+<YYINITIAL> "%%VB"                                                { yybegin(VB_CODE); printToken(yytext()); return symbol(sym.VB_SEP, "%%VB"); }
+
+<VB_CODE> {
+    "Dim"
+    "As"
+    "
+}
+/*-----------------------------AREA DE CODIGO DE VISUAL BASIC----------------------------------*/
