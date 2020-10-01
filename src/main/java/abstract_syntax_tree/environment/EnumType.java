@@ -13,6 +13,6 @@ public enum EnumType {
     integer,
     character,
     decimal,
-    bool,
+    nulo,
     error
 }
