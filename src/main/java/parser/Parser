@@ -1,1 +1,117 @@
+package parser;
+import java_cup.runtime.Symbol;
+import java.util.HashMap;
+import java.util.LinkedList;
+import lexer.MultilanguageLexer;
+
+import abstract_syntax_tree.Instruction;
+import abstract_syntax_tree.environment.GlobalError;
+
+parser code {:
+    public LinkedList<Instruction> AST;
+    private LinkedList<GlobalError> errors;
+
+    public MultilanguageParser(MultilanguageLexer lexer, LinkedList<GlobalError> errors) {
+        super(lexer);
+        this.errors = errors;
+    }
+
+     public void syntax_error(Symbol symbol) {
+       /* String message = "";
+        switch(symbol.toString()) {
+            case "#20": case "#3": case "#21": case "#18": case "#19": case "#4":{ 
+                message = "No se esperaba un signo de agrupacion llave, parentesis o corchete, verifique.";
+            break;
+            } 
+            case "#24": case "#31": case "#30": case "#23": case "#29": case "#28":{ 
+                message = "No se esperaba un signo de operacion relacional, verifique.";
+            break;
+            } 
+            case "#32": case "#27": { 
+                message = "No se esperaba un signo de operacion logica, verifique.";
+            break;
+            } 
+            case "#12": case "#13": { 
+                message = "No se esperaba falso o verdadero, verifique.";
+            break;
+            } 
+            case "#17": case "#25": case "#15": case "#10": { 
+                message = "No se esperaba un signo de operacion aritmetica, verifique.";
+            break;
+            } 
+            case "#7": case "#5": case "#6":  { 
+                message = "No se esperaba una asignacion de tipo de variable, verifique.";
+            break;
+            } 
+            case "#2": message = "No se esperaba la palabra reservada VARS, verifique."; break;
+            case "#37": message = "No se esperaba la palabra reservada INSTRUCCIONES, verifique."; break;
+            case "#26": message = "No se esperaba la palabra reservada IF, verifique."; break;
+            case "#34": message = "No se esperaba la palabra reservada ELSE, verifique."; break;
+            case "#35": message = "No se esperaba la palabra reservada WHILE, verifique."; break;
+            case "#36": message = "No se esperaba la palabra reservada PINTAR, verifique."; break;
+            case "#11": message = "Puede que su CADENA tenga una sintaxis incorrecta, o que se encuentre en un lugar indebido, verifique"; break;
+            case "#33": message = "Puede que su RANK tenga una sintaxis incorrecta, o que se encuentre en un lugar indebido, verifique"; break;
+            case "#22": message = "No se esperaba punto y coma, verifique"; break;
+            case "#14": message = "No se esperaba coma, verifique"; break;
+            case "#9": message = "No se esperaba igual, verifique"; break;
+            case "#8": message = "Puede que su ID no tenga una sintaxis correcta o que se encuentre en un lugar indebido, verifique." ; break;
+            case "#38": message = "Puede que su entero no tenga una sintaxis correcta o que se encuentre en un lugar indebido, verifique." ; break;
+        }
+        System.out.println(message);
+        GlobalError error = new GlobalError("pintura", "sintactico", (String)symbol.value, message, symbol.right,(symbol.left - 1));
+        errors.add(error); */
+    }
+
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception
+    { 
+        System.err.println("Error sintactico irrecuperable en la Linea " + (s.left) + " Columna "+s.right+". Componente " + s.value + " no reconocido."); 
+    }
+
+:}
+
+/* Terminales... (tokens RESULT by the scanner) */
+terminal String     VBSEP, JAVASEP, DIM, AS, INTEGER, DOUBLE, CHAR, SUB, END, FUNCTION, IF, THEN, ELSEIF, ELSE,
+                               DO, WHILE, LOOP, FOR, TO, STEP, NEXT, SELECT, CASE, IS, PUBLIC, MOD, INTIN, FLOATIN, CHARIN,
+                               AND, OR, NOT, COMMA, ROUNDBO, ROUNDBC, EQUAL, GREATER, LESS, GREATEREQ, LESSEQ,
+                               DIFFERENT, PLUS, MINUS, MULT, DIV, ID, CHARVB, PRINT, PYSEP, VOID, CLASS, SWITCH, CASE, BREAK,
+                               RETURN, SEMICOLON, COLON, CURLYBO, CURLYBC, EQEQ, NOTEQ, CHARJ, CSEP, ELIF, IN, RANGE, DEF,
+                               CHARP, IDENT
+                               ;
+terminal Float       FLOAT;
+terminal Integer   INT;
+
+non terminal
+
+precedence left NOT, PLUS, MIN;
+
+precedence left MULT, DIV, MOD;
+precedence left 
+/* Grammar */
+
+start with starting;
+
+starting ::= visual_area java_area python_area c_area;
+
+visual_area ::= VBSEP visual_instructions:inst              {::}
+;
+
+visual_instructions ::= visual_instructions:insts visual_instruction:inst       {::}
+                                       | visual_instruction:inst                                                {::}
+                                       ;
+
+visual_instruction ::= vb_print
+                                     | vb_declaration
+                                     | vb_assignation 
+                                     | vb_do_while
+                                     | vb_switch
+                                     | input
+                                     | vb_for
+                                     | vb_while
+                                     | vb_if
+                                     | vb_procedure
+                                     | vb_function
+                                     | vb_expression
+                                     ;
+
+vb_declaration ::=
 
