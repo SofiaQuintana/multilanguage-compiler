@@ -16,9 +16,12 @@ import java.util.LinkedList;
 
 /* RegEx */
 Identifier = [:jletter:] [:jletterdigit:]*
+CharVB = "\"" [^]{1} "\""
+CharJava = "'" [^]{1} "'"
 Integer = 0 | [1-9][0-9]*
 Decimal = ({Integer})(".")({Integer})
 LineTerminator = \r | \n | \r\n
+
 Whitespace = {LineTerminator} | [ \t\f]
 InputCharacter = [^\r\n]
 TraditionalComment = "/*" [^*] ~"*/" | "/*" "*" + "/"
@@ -45,7 +48,7 @@ BasicComment = "//" {InputCharacter}* {LineTerminator}?
     }
 
     private void lexical_error(String value, int line, int column, String block) {
-        GlobalError error = new GlobalError(line, column, "lexico", value, "elemento invalido en el bloque " + block);
+        GlobalError error = new GlobalError(line, column, "lexico", value, "elemento invalido en el bloque de " + block);
         errors.add(error);
     }
 
@@ -55,11 +58,170 @@ BasicComment = "//" {InputCharacter}* {LineTerminator}?
 
 
 /*-----------------------------AREA DE ESTADO INICIAL ----------------------------------*/
-<YYINITIAL> "%%VB"                                                { yybegin(VB_CODE); printToken(yytext()); return symbol(sym.VB_SEP, "%%VB"); }
+<YYINITIAL> "%%VB"                                                { yybegin(VB_CODE); printToken(yytext()); return symbol(sym.VBSEP, "%%VB"); }
 
+/*---------------------------------------------AREA DE CODIGO DE VISUAL BASIC---------------------------------------------*/
 <VB_CODE> {
-    "Dim"
-    "As"
-    "
+    /*---------------------------------------------KEYWORDS---------------------------------------------*/
+    "%%JAVA"                                                              { yybegin(JAVA_CODE); printToken(yytext()); return symbol(sym.JAVASEP, "%%JAVA"); }
+    "Dim"                                                                       { printToken(yytext()); return symbol(sym.DIM, yytext()); }
+    "As"                                                                         { printToken(yytext()); return symbol(sym.AS, yytext()); }
+    "Integer"                                                                 { printToken(yytext()); return symbol(sym.INTEGER, yytext()); }
+    "Double"                                                                 { printToken(yytext()); return symbol(sym.DOUBLE, yytext()); }
+    "Char"                                                                     { printToken(yytext()); return symbol(sym.CHAR, yytext()); }
+    "Sub"                                                                      { printToken(yytext()); return symbol(sym.SUB, yytext()); }
+    "End"                                                                      { printToken(yytext()); return symbol(sym.END, yytext()); } 
+    "Function"                                                              { printToken(yytext()); return symbol(sym.FUNCTION, yytext()); }
+    "If"                                                                           { printToken(yytext()); return symbol(sym.IF, yytext()); }
+    "Then"                                                                     { printToken(yytext()); return symbol(sym.THEN, yytext()); }
+    "ElseIf"                                                                    { printToken(yytext()); return symbol(sym.ELSEIF, yytext()); }
+    "Else"                                                                      { printToken(yytext()); return symbol(sym.ELSE, yytext()); }
+    "Do"                                                                        { printToken(yytext()); return symbol(sym.DO, yytext()); }
+    "While"                                                                   { printToken(yytext()); return symbol(sym.WHILE, yytext()); }
+    "Loop"                                                                    { printToken(yytext()); return symbol(sym.LOOP, yytext()); }
+    "For"                                                                       { printToken(yytext()); return symbol(sym.FOR, yytext()); }
+    "To"                                                                        { printToken(yytext()); return symbol(sym.TO, yytext()); }
+    "Step"                                                                     { printToken(yytext()); return symbol(sym.STEP, yytext()); }
+    "Next"                                                                     { printToken(yytext()); return symbol(sym.NEXT, yytext()); }
+    "Select"                                                                   { printToken(yytext()); return symbol(sym.SELECT, yytext()); }
+    "Case"                                                                     { printToken(yytext()); return symbol(sym.CASE, yytext()); }
+    "Is"                                                                           { printToken(yytext()); return symbol(sym.IS, yytext()); }
+    "Public"                                                                   { printToken(yytext()); return symbol(sym.PUBLIC, yytext()); }
+    "mod"                                                                     { printToken(yytext()); return symbol(sym.MOD, yytext()); }
+    "intinput"                                                              { printToken(yytext()); return symbol(sym.INTIN, yytext()); }
+    "floatinput"                                                            { printToken(yytext()); return symbol(sym.FLOATIN, yytext()); }
+    "charinput"                                                            { printToken(yytext()); return symbol(sym.CHARIN, yytext()); }
+    "Console.Write"                                                     { printToken(yytext()); return symbol(sym.PRINT, yytext()); }
+    /*---Operadores Logicos---*/
+    "And"                                                                       { printToken(yytext()); return symbol(sym.AND, yytext()); }
+    "Or"                                                                          { printToken(yytext()); return symbol(sym.OR, yytext()); }
+    "Not"                                                                        { printToken(yytext()); return symbol(sym.NOT, yytext()); }
+    /*---------------------------------------------SYMBOLS---------------------------------------------*/
+    ","                                                                             { printToken(yytext()); return symbol(sym.COMMA, ","); }
+    "&"                                                                           { printToken(yytext()); return symbol(sym.CONCAT, "&"); }
+    "("                                                                             { printToken(yytext()); return symbol(sym.ROUNDBO, "("); }
+    ")"                                                                             { printToken(yytext()); return symbol(sym.ROUNDBC, ")"); }
+    /*---Operadores Relacionales---*/
+    "="                                                                            { printToken(yytext()); return symbol(sym.EQUAL, "="); }
+    ">"                                                                            { printToken(yytext()); return symbol(sym.GREATER, ">"); }
+    "<"                                                                            { printToken(yytext()); return symbol(sym.LESS, "<"); }
+    ">="                                                                          { printToken(yytext()); return symbol(sym.GREATEREQ, ">="); }
+    "<="                                                                          { printToken(yytext()); return symbol(sym.LESSEQ, "<="); }
+    "<>"                                                                          { printToken(yytext()); return symbol(sym.DIFFERENT, "<>"); }
+    /*---Operadores Aritmeticos---*/
+    "+"                                                                           { printToken(yytext()); return symbol(sym.PLUS, "+"); }
+    "-"                                                                            { printToken(yytext()); return symbol(sym.MINUS, "-"); }
+    "*"                                                                            { printToken(yytext()); return symbol(sym.MULT, "*"); }
+    "/"                                                                            { printToken(yytext()); return symbol(sym.DIV, "/"); }
+    /*---------------------------------------------REGEX---------------------------------------------*/
+    {Identifier}                                                             { printToken(yytext()); return symbol(sym.ID, yytext()); }
+    {CharVB}                                                                { printToken(yytext()); return symbol(sym.CHARVB, yytext()); }
+    {Integer}                                                                { printToken(yytext()); return symbol(sym.INT, Integer.valueOf(yytext()) ); }
+    {Decimal}                                                               { printToken(yytext()); return symbol(sym.FLOAT, Double.valueOf(yytext()) ); }
+    {Whitespace}                                                        { /* Do nothing */ }
+    [^]                                                                           { lexical_error(yytext(), yyline+1, yycolumn+1, "-Codigo Visual Basic-"); }
 }
-/*-----------------------------AREA DE CODIGO DE VISUAL BASIC----------------------------------*/
+
+/*---------------------------------------------AREA DE CODIGO DE JAVA---------------------------------------------*/
+<JAVA_CODE> {
+    /*---------------------------------------------KEYWORDS---------------------------------------------*/
+    "%%PY"                                                              { yybegin(PYTHON_CODE); printToken(yytext()); return symbol(sym.PYSEP, "%%PY"); }
+    "public"                                                               { printToken(yytext()); return symbol(sym.PUBLIC, yytext()); }
+    "void"                                                                  { printToken(yytext()); return symbol(sym.VOID, yytext()); }
+    "class"                                                                 { printToken(yytext()); return symbol(sym.CLASS, yytext()); }
+    "if"                                                                      { printToken(yytext()); return symbol(sym.IF, yytext()); }
+    "else"                                                                  { printToken(yytext()); return symbol(sym.ELSE, yytext()); }
+    "for"                                                                   { printToken(yytext()); return symbol(sym.FOR, yytext()); }
+    "do"                                                                    { printToken(yytext()); return symbol(sym.DO, yytext()); }
+    "while"                                                                { printToken(yytext()); return symbol(sym.WHILE, yytext()); }
+    "switch"                                                              { printToken(yytext()); return symbol(sym.SWITCH, yytext()); }
+    "case"                                                                 { printToken(yytext()); return symbol(sym.CASE, yytext()); }
+    "System.out.println"                                         { printToken(yytext()); return symbol(sym.PRINT, yytext()); }
+    "int"                                                                    { printToken(yytext()); return symbol(sym.INTEGER, yytext()); }
+    "float"                                                                { printToken(yytext()); return symbol(sym.DOUBLE, yytext()); }
+    "char"                                                                 { printToken(yytext()); return symbol(sym.CHAR, yytext()); }
+    "break"                                                               { printToken(yytext()); return symbol(sym.BREAK, yytext()); }
+    "return"                                                              { printToken(yytext()); return symbol(sym.RETURN, yytext()); }
+    "intinput"                                                           { printToken(yytext()); return symbol(sym.INTIN, yytext()); }
+    "floatinput"                                                        { printToken(yytext()); return symbol(sym.FLOATIN, yytext()); }
+    "charinput"                                                         { printToken(yytext()); return symbol(sym.CHARIN, yytext()); }
+    /*---------------------------------------------SYMBOLS---------------------------------------------*/
+    ";"                                                                             { printToken(yytext()); return symbol(sym.SEMICOLON, ";"); }
+    ":"                                                                             { printToken(yytext()); return symbol(sym.COLON, ":"); }
+    "("                                                                             { printToken(yytext()); return symbol(sym.ROUNDBO, "("); }
+    ")"                                                                             { printToken(yytext()); return symbol(sym.ROUNDBC, ")"); }
+    "{"                                                                             { printToken(yytext()); return symbol(sym.CURLYBO, "{"); }
+    "}"                                                                             { printToken(yytext()); return symbol(sym.CURLYBC, "}"); }
+    /*---Operadores Logicos---*/
+    "&&"                                                                       { printToken(yytext()); return symbol(sym.AND, yytext()); }
+    "||"                                                                          { printToken(yytext()); return symbol(sym.OR, yytext()); }
+    "!"                                                                           { printToken(yytext()); return symbol(sym.NOT, yytext()); }
+    /*---Operadores de Asignacion---*/
+    "="                                                                             { printToken(yytext()); return symbol(sym.EQUAL, "="); }
+    /*---Operadores Aritmeticos---*/
+    "+"                                                                           { printToken(yytext()); return symbol(sym.PLUS, "+"); }
+    "-"                                                                            { printToken(yytext()); return symbol(sym.MINUS, "-"); }
+    "*"                                                                            { printToken(yytext()); return symbol(sym.MULT, "*"); }
+    "/"                                                                            { printToken(yytext()); return symbol(sym.DIV, "/"); }
+    "%"                                                                          { printToken(yytext()); return symbol(sym.MOD, "%"); } 
+    /*---Operadores Relacionales---*/
+    "=="                                                                          { printToken(yytext()); return symbol(sym.EQEQ, "=="); }
+    ">"                                                                            { printToken(yytext()); return symbol(sym.GREATER, ">"); }
+    "<"                                                                            { printToken(yytext()); return symbol(sym.LESS, "<"); }
+    ">="                                                                          { printToken(yytext()); return symbol(sym.GREATEREQ, ">="); }
+    "<="                                                                          { printToken(yytext()); return symbol(sym.LESSEQ, "<="); }
+    "!="                                                                           { printToken(yytext()); return symbol(sym.NOTEQ, "!="); }
+    /*---------------------------------------------REGEX---------------------------------------------*/
+    {Identifier}                                                             { printToken(yytext()); return symbol(sym.ID, yytext()); }
+    {CharJava}                                                             { printToken(yytext()); return symbol(sym.CHARJ, yytext()); }
+    {Integer}                                                                { printToken(yytext()); return symbol(sym.INT, Integer.valueOf(yytext()) ); }
+    {Decimal}                                                               { printToken(yytext()); return symbol(sym.FLOAT, Double.valueOf(yytext()) ); }
+    {Whitespace}                                                        { /* Do nothing */ }
+    [^]                                                                           { lexical_error(yytext(), yyline+1, yycolumn+1, "-Codigo Java-"); }
+}
+
+/*---------------------------------------------AREA DE CODIGO PYTHON---------------------------------------------*/
+<PYTHON_CODE> {
+    /*---------------------------------------------KEYWORDS---------------------------------------------*/
+     "%%PROGRAMA"                                                 { printToken(yytext()); return symbol(sym.CSEP, "%%PROGRAMA"); }
+    "if"                                                                          { printToken(yytext()); return symbol(sym.IF, yytext()); }
+    "elif"                                                                      { printToken(yytext()); return symbol(sym.ELIF, yytext()); }
+    "else"                                                                      { printToken(yytext()); return symbol(sym.ELSE, yytext()); }
+    "for"                                                                       { printToken(yytext()); return symbol(sym.FOR, yytext()); }
+    "in"                                                                         { printToken(yytext()); return symbol(sym.IN, yytext()); }
+    "range"                                                                  { printToken(yytext()); return symbol(sym.RANGE, yytext()); }
+    "break"                                                               { printToken(yytext()); return symbol(sym.BREAK, yytext()); }
+    "while"                                                                    { printToken(yytext()); return symbol(sym.WHILE, yytext()); }
+    "def"                                                                    { printToken(yytext()); return symbol(sym.DEF, yytext()); }
+    /*---Operadores Logicos---*/
+    "and"                                                                       { printToken(yytext()); return symbol(sym.AND, yytext()); }
+    "or"                                                                          { printToken(yytext()); return symbol(sym.OR, yytext()); }
+    "not"                                                                        { printToken(yytext()); return symbol(sym.NOT, yytext()); }
+    /*---------------------------------------------SYMBOLS---------------------------------------------*/
+    ":"                                                                             { printToken(yytext()); return symbol(sym.COLON, ":"); }
+    "("                                                                             { printToken(yytext()); return symbol(sym.ROUNDBO, "("); }
+    ")"                                                                             { printToken(yytext()); return symbol(sym.ROUNDBC, ")"); }
+    /*---Operadores de Asignacion---*/
+    "="                                                                             { printToken(yytext()); return symbol(sym.EQUAL, "="); }
+    /*---Operadores Aritmeticos---*/
+    "+"                                                                           { printToken(yytext()); return symbol(sym.PLUS, "+"); }
+    "-"                                                                            { printToken(yytext()); return symbol(sym.MINUS, "-"); }
+    "*"                                                                            { printToken(yytext()); return symbol(sym.MULT, "*"); }
+    "/"                                                                            { printToken(yytext()); return symbol(sym.DIV, "/"); }
+    /*---Operadores Relacionales---*/
+    "=="                                                                          { printToken(yytext()); return symbol(sym.EQEQ, "=="); }
+    ">"                                                                            { printToken(yytext()); return symbol(sym.GREATER, ">"); }
+    "<"                                                                            { printToken(yytext()); return symbol(sym.LESS, "<"); }
+    ">="                                                                          { printToken(yytext()); return symbol(sym.GREATEREQ, ">="); }
+    "<="                                                                          { printToken(yytext()); return symbol(sym.LESSEQ, "<="); }
+    "!="                                                                           { printToken(yytext()); return symbol(sym.NOTEQ, "!="); }
+    /*---Others---*/
+    "\t"                                                                         { printToken(yytext()); return symbol(sym.IDENT, "\t"); }
+    /*---------------------------------------------REGEX---------------------------------------------*/
+    {Identifier}                                                             { printToken(yytext()); return symbol(sym.ID, yytext()); }
+    {CharJava}                                                                { printToken(yytext()); return symbol(sym.CHARP, yytext()); }
+    {Integer}                                                                { printToken(yytext()); return symbol(sym.INT, Integer.valueOf(yytext()) ); }
+    {Decimal}                                                               { printToken(yytext()); return symbol(sym.FLOAT, Double.valueOf(yytext()) ); }
+    {Whitespace}                                                        { /* Do nothing */ }
+    [^]                                                                           { lexical_error(yytext(), yyline+1, yycolumn+1, "-Codigo Python-"); }
+}
